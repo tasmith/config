@@ -1,0 +1,17 @@
+# init.el is generated from init.org so we don't need it in repo
+init.el
+# backups need not be repo
+*~
+[#]*[#]
+
+# standard packages don't need to be in repo
+elpa/
+
+# savefiles are local to user/machine and ignored
+savefiles/
+
+# tramp related history etc. is ignored
+tramp
+
+# cached info etc is ignored
+var/
