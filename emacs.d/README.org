@@ -1,0 +1,24 @@
+#+TITLE:  Readme for Todd's Emacs Configuration
+#+AUTHOR: Todd Smith
+
+#+STARTUP: indent
+
+There are over 1600 files in my Emacs configuration directory!  However, most
+are generated or installed under the control of only one file, `init.org'.
+Traditionally, Emacs configurations were controlled by a `.emacs' file in a
+user's home directory.  Now, it is customary to use a directory `.emacs.d' in
+a user's home directory to hold all of the Emacs customization and locally
+installed extensions (packages).
+
+When Emacs starts, it attempts to load `.emacs' and if that is not present
+(because the configuration is stored it `.emacs.d') it attempts to load `.emacs.d/init.el'.
+
+My `init.org' contains instructions for using the proper commands to generate
+`init.el'.  Although the process could be more automated with a Makefile,
+the initial configuration of an Emacs environment is complex, involving the
+installation of many packages from package repositories.  For this reason, I
+prefer to manually generate the `init.el' and proceed to bring up emacs.
+
+Since most of this Emacs configuration is generated, many files in this
+directory should not be under version control.  Don't edit `init.el' edit
+`init.org' instead and follow instructions found there.

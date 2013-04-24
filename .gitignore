@@ -1,3 +1,9 @@
+#### Files for git to ignore in my configuration repo
+
+#### emacs.d 
+
+## this is a complex configuration, lots of files should not be under version control
+
 # init.el is generated from init.org so we don't need it in repo
 init.el
 # backups need not be repo
