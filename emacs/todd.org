@@ -547,15 +547,7 @@ often cited as being the best interface to git.
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :init
-    (setq magit-completing-read-function 'ivy-completing-read)
-    :bind
-    ("<f8> g s" . magit-status)
-    ("<f8> g x" . magit-checkout)
-    ("<f8> g c" . magit-commit)
-    ("<f8> g p" . magit-push)
-    ("<f8> g u" . magit-pull)
-    ("<f8> g e" . magit-ediff-resolve)
-    ("<f8> g r" . magit-rebase-interactive))
+    (setq magit-completing-read-function 'ivy-completing-read))
 
   (use-package magit-popup)
 #+END_SRC
