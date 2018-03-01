@@ -57,7 +57,7 @@ For better security, I use =https= URL's for all of my package sources now.
 
 John Wiegley's =use-package= is a great way to keep configuration
 of installed packages organized. First, make sure it is installed,
-and install packages =diminish= and =bind-key= which are dependencies
+and install packages =delight= and =bind-key= which are dependencies
 for use package.
 
 #+BEGIN_SRC emacs-lisp
@@ -66,8 +66,6 @@ for use package.
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-(use-package diminish)
-(use-package bind-key)
 #+END_SRC
 
 Initialize a few =use-package= settings.
@@ -82,6 +80,13 @@ Initialize a few =use-package= settings.
 #+BEGIN_SRC emacs-lisp
 (eval-when-compile
   (require 'use-package))
+#+END_SRC
+
+These two packages support the :delight and :bind keys in =use-package=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package delight)
+(use-package bind-key)
 #+END_SRC
 
 ** Core Settings
@@ -342,6 +347,7 @@ Now for some themes.
 
 #+BEGIN_SRC emacs-lisp
   (use-package company
+    :delight
     :config
     (global-company-mode))
 #+END_SRC
@@ -512,6 +518,7 @@ Be sure to see [[http://www.flycheck.org/en/latest/index.html][Flycheck document
 
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
+    :delight " Fc"
     :init (global-flycheck-mode))
 #+END_SRC
 
@@ -559,6 +566,7 @@ See the documentation at [[https://projectile.readthedocs.io/en/latest/][Project
 
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
+    :delight '(:eval (concat " {" (projectile-project-name) "}"))
     :init
     (setq projectile-completion-system 'ivy)
     ; (setq projectile-keymap-prefix (kbd "<f8> p"))
