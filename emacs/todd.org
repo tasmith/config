@@ -279,12 +279,23 @@ Just like the Spacemacs dashboard!
 
 *** Themes
 
-Switching themes can be troublesome; perhaps this package will help.
-
 Now for some themes.
 
 #+BEGIN_SRC emacs-lisp
+  (use-package spacemacs-theme :defer)
+  (use-package zenburn-theme :defer)
+  (use-package solarized-theme :defer)
+  (use-package leuven-theme :defer)
+  (use-package color-theme-sanityinc-tomorrow :defer)
+  (use-package monokai-theme :defer)
+  (use-package material-theme :defer)
+  (use-package moe-theme :defer)
+  (use-package cyberpunk-theme :defer)
+  (use-package ample-theme :defer)
+  (use-package tango-plus-theme :defer)
+  (use-package espresso-theme :defer)
 
+  (load-theme 'spacemacs-light t)
 #+END_SRC
 
 ** Time in the modeline
