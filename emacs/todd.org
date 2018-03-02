@@ -341,6 +341,11 @@ Now for some themes.
     ("<f8> j j" . avy-goto-char)
     ("<f8> j w" . avy-goto-word-1)
     ("<f8> j l" . avy-goto-line))
+
+  (use-package avy-zap
+    :bind
+    ("M-z" . avy-zap-to-char-dwim)
+    ("M-Z" . avy-zap-up-to-char-dwim))
 #+END_SRC
 
 ** Company
@@ -501,101 +506,6 @@ commands
     (setq ediff-diff-options "-w"))
 #+END_SRC
 
-** Expand region
-
-#+BEGIN_SRC emacs-lisp
-  (use-package expand-region
-    :init
-    (setq expand-region-contract-fast-key "V")
-    (setq expand-region-reset-fast-key "r")
-    :bind
-    ("<f8> v" . er/expand-region))
-#+END_SRC
-
-** Flycheck
-
-Be sure to see [[http://www.flycheck.org/en/latest/index.html][Flycheck documentation]].
-
-#+BEGIN_SRC emacs-lisp
-  (use-package flycheck
-    :delight " Fc"
-    :init (global-flycheck-mode))
-#+END_SRC
-
-
-** Hlinum and linum
-
-The =linum= package numbers lines; the =hlinum= package highlights the current
-line's line number.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package hlinum
-    :config
-    (hlinum-activate))
-
-  (use-package linum
-    :config
-    (setq linum-format " %3d ")
-    :hook (prog-mode . linum-mode))
-#+END_SRC
-
-** Magit
-
-Org mode, Projectile, and Magit are key features of Emacs. This package, Magit, is
-often cited as being the best interface to git.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :init
-    (setq magit-completing-read-function 'ivy-completing-read))
-
-  (use-package magit-popup)
-#+END_SRC
-
-** Projectile
-
-See the documentation at [[https://projectile.readthedocs.io/en/latest/][Projectile at readthedocs]].
-
-#+BEGIN_SRC emacs-lisp
-  (use-package projectile
-    :delight '(:eval (concat " {" (projectile-project-name) "}"))
-    :init
-    (setq projectile-completion-system 'ivy)
-    ; (setq projectile-keymap-prefix (kbd "<f8> p"))
-    :config
-    (projectile-global-mode))
-#+END_SRC
-
-  Although the =projectile= package supports Ivy as its completion system,
-  =counsel-projectile= provides further integration.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package counsel-projectile
-    :bind
-    ("<f8> p SPC" . councel-projectile)
-    ("<f8> p p"   . councel-projectile-switch-project)
-    )
-#+END_SRC
-
-** Rainbow delimiters
-
-#+BEGIN_SRC emacs-lisp
-  (use-package rainbow-delimiters
-    :hook ((prog-mode org-mode) . rainbow-delimiters-mode))
-#+END_SRC
-
-** Winner mode - undo and redo window configuration
-
-=winner-mode= lets you use =C-c <left>= and =C-c <right>=
-to switch between window configurations.
-This is handy when something has popped up a buffer that you want to look at
-briefly before returning to whatever you were working on.
-When you're done, press =C-c <left>=.
-
-#+BEGIN_SRC emacs-lisp
-(use-package winner)
-#+END_SRC
-
 ** Eww
 
 #+BEGIN_SRC emacs-lisp
@@ -636,21 +546,43 @@ When you're done, press =C-c <left>=.
 (global-set-key (kbd "C-c u") 'browse-last-url-in-brower)
 #+END_SRC
 
-** Which key
+
+** Expand region
 
 #+BEGIN_SRC emacs-lisp
-  (use-package which-key
-    :delight which-key-mode
+  (use-package expand-region
+    :init
+    (setq expand-region-contract-fast-key "V")
+    (setq expand-region-reset-fast-key "r")
+    :bind
+    ("<f8> v" . er/expand-region))
+#+END_SRC
+
+** Flycheck
+
+Be sure to see [[http://www.flycheck.org/en/latest/index.html][Flycheck documentation]].
+
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck
+    :delight " Fc"
+    :init (global-flycheck-mode))
+#+END_SRC
+
+
+** Hlinum and linum
+
+The =linum= package numbers lines; the =hlinum= package highlights the current
+line's line number.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package hlinum
     :config
-    (which-key-mode)
-    ; (which-key-setup-side-window-right-bottom)
-    (which-key-add-key-based-replacements
-      "<f8> /" '("search" . "Search Commands")
-      "<f8> b" '("buffer" . "Buffer Commands")
-      "<f8> f" '("file" . "File Commands")
-      "<f8> g" '("magit" . "Magit Commands")
-      )
-    )
+    (hlinum-activate))
+
+  (use-package linum
+    :config
+    (setq linum-format " %3d ")
+    :hook (prog-mode . linum-mode))
 #+END_SRC
 
 ** Hydra
@@ -675,6 +607,196 @@ When you're done, press =C-c <left>=.
       ("v" visual-line-mode nil)
       ("w" whitespace-mode nil)
       ("q" nil "quit")))
+#+END_SRC
+
+** Magit
+
+Org mode, Projectile, and Magit are key features of Emacs. This package, Magit, is
+often cited as being the best interface to git.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :init
+    (setq magit-completing-read-function 'ivy-completing-read))
+
+  (use-package magit-popup)
+#+END_SRC
+
+** Multiple cursors
+
+Not really needed, see [[http://ergoemacs.org/misc/emacs_multiple-cursors-mode.html][Ergo Emacs on multiple cursors]].
+
+Instead, some useful command to remember:
+
+  - =M-z= :: =(zap-to-char)= kill up to and including ARGth occurrence of character.
+    Actually bound in package =avy-zap= above.
+  - =M-z char char C-b=  :: effect of zap-up-to-char.
+  - =M-Z= :: =zap-up-to-char= is not an actual Emacs command, but I've bound this key
+    above in =avy-zap= package.
+  - =repeat-complex-command= :: normally bound to =C-x M-:=, but this is hard to type
+    so rebind it to something a lot simpler to type.
+  - Define a macro, select a region and use =M-x apply-macro-to-region-lines=.
+
+#+BEGIN_SRC emacs-lisp
+  (bind-key "<f8> ." 'repeat-complex-command)
+#+END_SRC
+
+** Neotree
+
+#+BEGIN_SRC emacs-lisp
+  (use-package neotree
+    :init
+    (setq neo-theme 'arrow
+          neotree-smart-optn t
+          neo-window-fixed-size nil)
+    :bind
+    ("<f8> d t" . neotree-toggle))
+
+#+END_SRC
+
+** Org
+
+See [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's Emacs configuration]] for lots of org-mode ideas.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :delight "O"
+    :mode "\\.org\'"
+    :init
+    (setq org-default-notes-file "~/notes.org"))
+#+END_SRC
+
+*** org-projectile
+
+At some point I may want this package. Right now this is just a placeholder.
+
+*** Org bullets
+
+Install the package, but I really prefer the asterisks now.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package org-bullets)
+#+END_SRC
+
+** Page Break Lines
+
+#+BEGIN_SRC emacs-lisp
+  (use-package page-break-lines
+    :config
+    (global-page-break-lines-mode))
+#+END_SRC
+
+** Projectile
+
+See the documentation at [[https://projectile.readthedocs.io/en/latest/][Projectile at readthedocs]].
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :delight '(:eval (concat " {" (projectile-project-name) "}"))
+    :init
+    (setq projectile-completion-system 'ivy)
+    ; (setq projectile-keymap-prefix (kbd "<f8> p"))
+    :config
+    (projectile-global-mode))
+#+END_SRC
+
+  Although the =projectile= package supports Ivy as its completion system,
+  =counsel-projectile= provides further integration.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package counsel-projectile
+    :bind
+    ("<f8> p SPC" . councel-projectile)
+    ("<f8> p p"   . councel-projectile-switch-project)
+    )
+#+END_SRC
+
+** Rainbow delimiters
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :hook ((prog-mode org-mode) . rainbow-delimiters-mode))
+#+END_SRC
+
+** Recentf
+
+#+BEGIN_SRC emacs-lisp
+  (use-package recentf
+    :init
+    (setq recent-save-file (expand-file-name "recentf" user-emacs-directory))
+    :config
+    (recentf-mode 1))
+#+END_SRC
+
+** Smartparens
+
+#+BEGIN_SRC emacs-lisp
+  (use-package smartparens)
+#+END_SRC
+
+** Undo Tree
+
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree
+    :config
+    (global-undo-tree-mode 1))
+#+END_SRC
+
+** wgrep
+
+Placeholder, I'd like to try this out.
+
+#+BEGIN_SRC emacs-lisp  :tangle no
+  (use-package wgrep)
+#+END_SRC
+
+** Which key
+
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :delight which-key-mode
+    :config
+    (which-key-mode)
+    ; (which-key-setup-side-window-right-bottom)
+    (which-key-add-key-based-replacements
+      "<f8> /" '("search" . "Search Commands")
+      "<f8> b" '("buffer" . "Buffer Commands")
+      "<f8> d" '("directory" . "Directory Commands")
+      "<f8> f" '("file" . "File Commands")
+      "<f8> g" '("magit" . "Magit Commands")
+      )
+    )
+#+END_SRC
+
+** Windmove
+
+#+BEGIN_SRC emacs-lisp
+  (use-package windmove
+    :bind
+    ("<f8> w u" . windmove-up)
+    ("<f8> w d" . windmove-down)
+    ("<f8> w l" . windmove-left)
+    ("<f8> w r" . windmove-right))
+#+END_SRC
+
+** Winner mode - undo and redo window configuration
+
+=winner-mode= lets you use =C-c <left>= and =C-c <right>=
+to switch between window configurations.
+This is handy when something has popped up a buffer that you want to look at
+briefly before returning to whatever you were working on.
+When you're done, press =C-c <left>=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package winner)
+#+END_SRC
+
+** Yasnippet
+
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet
+    :config
+    (yas-global-mode 1))
 #+END_SRC
 
 * Programming languages
