@@ -107,6 +107,7 @@ overwritten each time I tangle this file to generate it.
 
 #+BEGIN_SRC emacs-lisp
 (setq custom-file "~/.emacs.d/custom-settings.el")
+(load custom-file)
 #+END_SRC
 
 *** UTF-8
@@ -196,14 +197,20 @@ Here I configure Emacs to save all backups in one place. This has three disadvan
 These disadvantages are relatively minor and are outweighed, in my mind, by the advantage
 of maintaining cleaner directories of just the files that I am working with.
 
+Files under version control, for example with git, already have past changes and work-in-progress
+saved. Therefore, I configure Emacs to *not* make it's ordinary backups for those files.
+See configuration of the =magit= package.
+
 #+BEGIN_SRC emacs-lisp
   (defconst my-backup-dir (expand-file-name "backups/" user-emacs-directory))
   (defconst my-auto-save-dir (expand-file-name "auto-save-list/" user-emacs-directory))
 
   (setq backup-directory-alist   `(("." . ,my-backup-dir))
-        delete-old-versions      -1
-        version-control          t     ; number the backup files
-        vc-make-backup-file      t     ; make backups for files under vc
+        version-control          t     ; number the backup files (not refering to real version control)
+        delete-old-versions      t     ; delete excess backups silently
+        kept-old-versions        2     ; but keep 2 oldest
+        kept-new-versions        2     ; and keep 2 latest
+        vc-make-backup-files     nil   ; make backups for files under real vc
         auto-save-file-name-transforms  `((".*" ,my-auto-save-dir t)))
         history-length           1000
 #+END_SRC
@@ -245,10 +252,10 @@ First deal with some whitespace issues:
   * Delete trailing whitespace from lines before saving.
 
 #+BEGIN_SRC emacs-lisp
-  (setq sentence-end-double-space nil
-        require-final-newline     t
-        indent-tabs-mode          nil)
-  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(setq sentence-end-double-space nil
+      require-final-newline     t
+      indent-tabs-mode          nil)
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+END_SRC
 
 Tweak the user interface to my liking.
@@ -283,6 +290,21 @@ single key press (=q=) and get my windows back.
 
 #+BEGIN_SRC emacs-lisp
   (setq help-window-select t)
+#+END_SRC
+
+Delete files by moving to system /trash/, obviously.
+
+#+BEGIN_SRC  emacs-lisp
+  (setq delete-by-moving-to-trash t)
+#+END_SRC
+
+Scrolling improvements, I think. I've experimented with these settings, but
+I'm not sure that it's an improvement overall.
+
+#+BEGIN_SRC emacs-lisp
+(setq scroll-margin 0)
+(setq scroll-conservatively 10000)
+(setq scroll-preserve-screen-position t)
 #+END_SRC
 
 * General configuration
@@ -338,44 +360,49 @@ See [[http://amitp.blogspot.com/2017/01/emacs-spaceline-mode-line.html][Amit Pat
 However, I can probably make due with something simpler.
 
 #+begin_src emacs-lisp
-  (use-package winum
-    :init
-    (setq winum-auto-setup-mode-line nil)
-    :config
-    (winum-mode))
+(use-package winum
+  :init
+  (setq winum-auto-setup-mode-line nil)
+  :config
+  (winum-mode))
 
-  (use-package anzu
-    :delight
-    :config
-    (global-anzu-mode))
+(use-package anzu
+  :delight
+  :config
+  (global-anzu-mode))
 
-  (use-package fancy-battery)
+(use-package fancy-battery)
 
-  (use-package spaceline
-    :demand t
-    :init
-    (setq-default ; powerline-height 20
-                  powerline-default-separator 'arrow-fade
-                  spaceline-flycheck-bullet "❖%s"
-                  spaceline-separator-dir-left '(right . right)
-                  spaceline-separator-dir-right '(left . left)
-                  spaceline-workspace-numbers-unicode t
-                  spaceline-windows-numbers-unicode t)
-    :config
-    (require 'spaceline-config)
-    (spaceline-spacemacs-theme))
+(use-package spaceline
+  :demand t
+  :init
+  (setq-default ; powerline-height 20
+   powerline-default-separator 'arrow-fade
+   spaceline-flycheck-bullet "❖%s"
+   spaceline-separator-dir-left '(right . right)
+   spaceline-separator-dir-right '(left . left)
+   spaceline-workspace-numbers-unicode t
+   spaceline-windows-numbers-unicode t)
+  :config
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme))
 #+end_src
 
 ** Screen saver
+
+Nyan cat, but don't fill message buffer up with useless progress messages about how long
+nyan has been running. Not really a screen saver because I haven't set it to run
+automatically after an idle delay. I prefer not to burn cpu cycles needlessly
+just because I'm AFK or reading something in a browser.
+
+Nevertheless, it's a cute demo. Try =M-x zone=.
 
 #+BEGIN_SRC emacs-lisp
   (use-package zone-nyan)
   (use-package zone
     :init
     (setq zone-programs [zone-nyan])
-    (setq zone-nyan-hide-progress t)
-    :config
-    (zone-when-idle 60))
+    (setq zone-nyan-hide-progress t))
 #+END_SRC
 
 ** Syntax highlighting and other highlighting
@@ -656,7 +683,7 @@ Be sure to see [[http://www.flycheck.org/en/latest/index.html][Flycheck document
 
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
-    :delight "f"
+    :delight "Fc"
     :init (global-flycheck-mode))
 #+END_SRC
 
@@ -704,14 +731,28 @@ line's line number.
 ** Magit
 
 Org mode, Projectile, and Magit are key features of Emacs. This package, Magit, is
-often cited as being the best interface to git.
+often cited as being the best interface there is to git.
+
+Auto-revert-mode is a dependency for magit, use-package here allows me to delight its mode line lighter.
+
+Work in progress is saved by git and by the way that I've configured =magit=, see [[https://magit.vc/manual/magit/Wip-Modes.html#Wip-Modes][Magit Wip Modes]].
 
 #+BEGIN_SRC emacs-lisp
   (use-package magit
-    :init
-    (setq magit-completing-read-function 'ivy-completing-read))
+    :config
+    (setq magit-completing-read-function 'ivy-completing-read)
+    (magit-wip-after-save-mode)
+    (magit-wip-after-apply-mode)
+    (magit-wip-before-change-mode)
+    (setq magit-wip-after-save-local-mode-lighter nil
+          magit-wip-after-apply-mode-lighter nil
+          magit-wip-before-change-mode-lighter nil))
 
   (use-package magit-popup)
+
+  (use-package autorevert
+    :commands auto-revert-mode
+    :delight auto-revert-mode)
 #+END_SRC
 
 ** Multiple cursors
@@ -753,7 +794,10 @@ See [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's Emacs configu
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :mode "\\.org\'"
-    :init
+    :config
+    ;; (setq org-src-fontify-natively t)
+    ;; (setq org-src-tab-acts-natively t)
+    (setq org-edit-src-content-indentation 0)
     (setq org-default-notes-file "~/notes.org"))
 #+END_SRC
 
@@ -773,6 +817,7 @@ Install the package, but I really prefer the asterisks now.
 
 #+BEGIN_SRC emacs-lisp
   (use-package page-break-lines
+    :delight
     :config
     (global-page-break-lines-mode))
 #+END_SRC
@@ -790,7 +835,7 @@ See the documentation at [[https://projectile.readthedocs.io/en/latest/][Project
 
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :delight '(:eval (concat "[" (projectile-project-name) "]"))
+    :delight "Pr"
     :init
     (setq projectile-completion-system 'ivy)
     ; (setq projectile-keymap-prefix (kbd "<f8> p"))
@@ -894,12 +939,20 @@ When you're done, press =C-c <left>=.
 
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
-    :delight
+    :delight yas-minor-mode "Ys"
     :config
+    ;(delight 'yas-minor-mode "Ys" 'yasnippet)
+    (add-to-list 'yas-snippet-dirs (expand-file-name "snippets/" user-emacs-directory))
     (yas-global-mode 1))
 #+END_SRC
 
 * Programming languages
+
+#+BEGIN_SRC emacs-lisp
+  (defun my-programming-settings ()
+    (setq show-trailing-whitespace t))
+  (add-hook 'prog-mode-hook 'my-programming-settings)
+#+END_SRC
 
 ** C
 
@@ -1002,15 +1055,15 @@ When you're done, press =C-c <left>=.
 
                     ;; My defaults for c-code
                     (setq c-default-style "linux")
-                    (setq show-trailing-whitespace t)
                     (setq indent-tabs-mode t)
 
                     ;; Override these defaults based on file/project location
                     ;; Example for linux kernel coding:
-                    (when (and filename
-                               (string-match (expand-file-name "~/src/linux-trees")
-                                             filename))
-                      (c-set-style "linux-tabs-only"))))))
+                    ;; (when (and filename
+                    ;;          (string-match (expand-file-name "~/src/linux-trees")
+                    ;;                        (expand-file-name filename)))
+                    ;;   (c-set-style "linux-tabs-only"))
+                    ))))
 #+END_SRC
 
 *** GDB
