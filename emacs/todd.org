@@ -15,12 +15,12 @@ which is symlinked to the name =init.el= in my =~/.emacs.d= directory.
 My configuration is greatly influenced by the numerous clever ideas incorporated
 in many other Emacs user's configuration files.
 
-  * [[https://raw.githubusercontent.com/sachac/.emacs.d/gh-pages/Sacha.org][Sacha Chua's Emacs Configuration]]
-  * Samuel Barreto's [[https://sam217pa.github.io/2016/09/23/keybindings-strategies-in-emacs/][Keybinding Strategies in Emacs]] and [[https://sam217pa.github.io/2016/08/30/how-to-make-your-own-spacemacs/][Make your own Spacemacs]]
-  * Aaron Bieber's [[https://blog.aaronbieber.com/2016/11/24/org-capture-from-anywhere-on-your-mac.html][Org Capture from Anywhere on Your Mac]]
-  * Filipe Silva's [[https://github.com/ninrod/dotfiles/blob/master/emacs/boot.org][Ninrod Emacs Configuration]]
-  * [[http://emacs-bootstrap.com/][Emacs Bootstrap]]
-  * Amit Patel's blog posts: [[http://amitp.blogspot.com/search/label/emacs][Amits Thoughts: emacs]]
+  - [[https://raw.githubusercontent.com/sachac/.emacs.d/gh-pages/Sacha.org][Sacha Chua's Emacs Configuration]]
+  - Samuel Barreto's [[https://sam217pa.github.io/2016/09/23/keybindings-strategies-in-emacs/][Keybinding Strategies in Emacs]] and [[https://sam217pa.github.io/2016/08/30/how-to-make-your-own-spacemacs/][Make your own Spacemacs]]
+  - Aaron Bieber's [[https://blog.aaronbieber.com/2016/11/24/org-capture-from-anywhere-on-your-mac.html][Org Capture from Anywhere on Your Mac]]
+  - Filipe Silva's [[https://github.com/ninrod/dotfiles/blob/master/emacs/boot.org][Ninrod Emacs Configuration]]
+  - [[http://emacs-bootstrap.com/][Emacs Bootstrap]]
+  - Amit Patel's blog posts: [[http://amitp.blogspot.com/search/label/emacs][Amits Thoughts: emacs]]
 
 * Base configuration
 
@@ -286,7 +286,8 @@ Seeing matching parentheses is /very/ helpful while programming.
 #+END_SRC
 
 Help windows are selected automatically so that I can close them with just a
-single key press (=q=) and get my windows back.
+single key press (=q=) and get my windows back.  Seems to be what I want more
+often than default which requires =C-x o= then =q=.
 
 #+BEGIN_SRC emacs-lisp
   (setq help-window-select t)
@@ -298,13 +299,28 @@ Delete files by moving to system /trash/, obviously.
   (setq delete-by-moving-to-trash t)
 #+END_SRC
 
-Scrolling improvements, I think. I've experimented with these settings, but
-I'm not sure that it's an improvement overall.
+Scrolling improvements, I think. Still experimenting with these settings, but
+it does seem to be an improvement.
 
 #+BEGIN_SRC emacs-lisp
 (setq scroll-margin 0)
 (setq scroll-conservatively 10000)
 (setq scroll-preserve-screen-position t)
+#+END_SRC
+
+For better same-name buffer distinction, use uniquify
+
+#+BEGIN_SRC emacs-lisp
+(use-package uniquify
+  :ensure nil                           ; not really a package
+  :config
+  (setq uniquify-buffer-name-style 'forward))
+#+END_SRC
+
+For files previously opened, restore point when reopening.
+
+#+BEGIN_SRC emacs-lisp
+(save-place-mode 1)
 #+END_SRC
 
 * General configuration
@@ -315,7 +331,7 @@ I'm not sure that it's an improvement overall.
 (use-package dash)
 #+END_SRC
 
-** Appearance
+* Appearance
 
 ** Splash Screen
 
@@ -333,7 +349,7 @@ Just like the Spacemacs dashboard!
   (dashboard-setup-startup-hook))
 #+END_SRC
 
-*** Themes
+** Themes
 
 Now for some themes.
 
@@ -447,7 +463,6 @@ Highlight the top/bottom line of view while paging. Not sure about this.
 #+END_SRC
 
 * Extensions
-
 ** Avy
 
 See dumb-jump, ace-jump, and ggtags
@@ -609,8 +624,12 @@ commands
     ; buffers
     ("<f8> b b" . counsel-ibuffer)
     ; searching
+    ("C-r" . swiper)
     ("C-s" . swiper)
-    ("C-c s" . isearch-forward-regexp)
+    ("C-c r" . isearch-backward)
+    ("C-c R" . isearch-backward-regexp)
+    ("C-c s" . isearch-forward)
+    ("C-c S" . isearch-forward-regexp)
     ("<f8> / g" . counsel-git-grep)
     ("<f8> / a" . counsel-ag))
 #+END_SRC
@@ -665,7 +684,6 @@ commands
 (global-set-key (kbd "C-c u") 'browse-last-url-in-brower)
 #+END_SRC
 
-
 ** Expand region
 
 #+BEGIN_SRC emacs-lisp
@@ -686,7 +704,6 @@ Be sure to see [[http://www.flycheck.org/en/latest/index.html][Flycheck document
     :delight "Fc"
     :init (global-flycheck-mode))
 #+END_SRC
-
 
 ** Hlinum and linum
 
@@ -785,32 +802,6 @@ Instead, some useful command to remember:
     :bind
     ("<f8> d t" . neotree-toggle))
 
-#+END_SRC
-
-** Org
-
-See [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's Emacs configuration]] for lots of org-mode ideas.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package org
-    :mode "\\.org\'"
-    :config
-    ;; (setq org-src-fontify-natively t)
-    ;; (setq org-src-tab-acts-natively t)
-    (setq org-edit-src-content-indentation 0)
-    (setq org-default-notes-file "~/notes.org"))
-#+END_SRC
-
-*** org-projectile
-
-At some point I may want this package. Right now this is just a placeholder.
-
-*** Org bullets
-
-Install the package, but I really prefer the asterisks now.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package org-bullets)
 #+END_SRC
 
 ** Page Break Lines
@@ -941,9 +932,38 @@ When you're done, press =C-c <left>=.
   (use-package yasnippet
     :delight yas-minor-mode "Ys"
     :config
-    ;(delight 'yas-minor-mode "Ys" 'yasnippet)
     (add-to-list 'yas-snippet-dirs (expand-file-name "snippets/" user-emacs-directory))
     (yas-global-mode 1))
+#+END_SRC
+
+* Org mode
+
+See [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's Emacs configuration]] for lots of org-mode ideas.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :mode "\\.org\'"
+    :config
+    ;; (setq org-src-fontify-natively t)
+    ;; (setq org-src-tab-acts-natively t)
+    (setq org-edit-src-content-indentation 0)
+    (setq org-default-notes-file "~/notes.org"))
+#+END_SRC
+
+*** org-projectile
+
+At some point I may want this package. Right now this is just a placeholder.
+
+*** Org bullets
+
+I'm so used to looking at asteriks for outlines that bullets look a bit strange to me but here
+goes.
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :commands org-bullets-mode
+  :init
+    (add-hook 'org-mode-hook 'org-bullets-mode))
 #+END_SRC
 
 * Programming languages
@@ -1137,66 +1157,62 @@ When you're done, press =C-c <left>=.
     (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
 
-
 * Keybindings
+  This section is generated (with some additional editing) by =describe-personal-keybindings=.
 
-The General package is a very flexible package for defining key bindings.
+** global map
 
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package general
-    :commands general-define-key)
-#+END_SRC
+| Key name | Command                   | Comments              |
+|----------+---------------------------+-----------------------|
+| <f8> .   | `repeat-complex-command'  |                       |
+| <f8> / a | `counsel-ag'              |                       |
+| <f8> / g | `counsel-git-grep'        |                       |
+| <f8> b b | `counsel-ibuffer'         |                       |
+| <f8> d t | `neotree-toggle'          |                       |
+| <f8> f f | `counsel-find-file'       |                       |
+| <f8> f g | `counsel-git'             |                       |
+| <f8> f l | `counsel-locate'          |                       |
+| <f8> f r | `counsel-recentf'         |                       |
+| <f8> j b | `pop-global-mark'         |                       |
+| <f8> j j | `avy-goto-char'           |                       |
+| <f8> j l | `avy-goto-line'           |                       |
+| <f8> j w | `avy-goto-word-1'         |                       |
+| <f8> v   | `er/expand-region'        |                       |
+| <f8> w d | `windmove-down'           |                       |
+| <f8> w l | `windmove-left'           |                       |
+| <f8> w r | `windmove-right'          |                       |
+| <f8> w u | `windmove-up'             |                       |
+|----------+---------------------------+-----------------------|
+| C-r      | `swiper'                  | was `isearch-backward |
+| C-s      | `swiper'                  | was `isearch-forward' |
+| C-c r    | `isearch-backward'        |                       |
+| C-c s    | `isearch-forward'         |                       |
+| C-c R    | `isearch-backward-regexp' |                       |
+| C-c S    | `isearch-forward-regexp'  |                       |
+|----------+---------------------------+-----------------------|
+| C-c C-r  | `ivy-resume'              |                       |
+| M-Z      | `avy-zap-up-to-char-dwim' |                       |
+| M-z      | `avy-zap-to-char-dwim'    | was `zap-to-char'     |
 
-I use it to redefine a few default bindings.
+** eww-mode-map: U
 
-#+BEGIN_SRC emacs-lisp :tangle no
-  (general-define-key
-   "C-s"     'swiper
-   "M-x"     'counsel-M-x)
-#+END_SRC
+| Key name | Command              |
+|----------+----------------------|
+| U        | `eww-lnum-universal' |
+| f        | `eww-lnum-follow'    |
 
-I redifine =C-x=, =C-h=, and =f1= bindings to take advantage of =councel=
-and =ivy= packages.
+** ggtags-mode-map: C-c <
 
-#+BEGIN_SRC emacs-lisp :tangle no
-;  (general-define-key
-;   "C-x C-f"   'counsel-find-file
-;   "C-x C-b"   'counsel-ibuffer
-;   "C-x b"     'ivy-switch-buffer
-;   "C-x l"     'counsel-locate
-;   "C-x C-f"   'counsel-find-file
-
-;   "C-h f"     'counsel-describe-function
-;   "C-h v"     'counsel-describe-variable
-;   "C-h l"     'counsel-find-library
-;   "C-h S"     'counsel-info-lookup-symbol
-;   "C-h u"     'counsel-unicode-char
-
-;   "<f1> f"    'counsel-describe-function
-;   "<f1> v"    'counsel-describe-variable
-;   "<f1> l"    'counsel-find-library
-;   "<f1> S"    'counsel-info-lookup-symbol
-;   "<f1> u"    'counsel-unicode-char)
-#+END_SRC
-
-My =C-c= bindings
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (general-define-key
-   :prefix "C-c"
-   "g"   '(counsel-git :which-key "find file in git dir")
-   "/"   'counsel-git-grep
-   "k"   'counsel-ag
-   "t"   'hydra-toggle/body
-
-   "C-r" 'ivy-resume
-
-   ;; binds to double key press
-   "f"      '(:ignore t :which-key "files")
-;   "ff"     'counsel-find-file    ; find file using ivy
-   "fr"     'counsel-recentf      ; find recently edited files
-   "fl"     'link-hint-open-link  ; open a link in a browser
-
-   "p"      '(:ignore t :which-key "project")
-   "pf"     '(counsel-git :which-key "find file in git dir"))
-#+END_SRC
+| Key name | Command                    |
+|----------+----------------------------|
+| C-c <    | `ggtags-prev-mark'         |
+| C-c >    | `ggtags-next-mark'         |
+| C-c g c  | `ggtags-create-tags'       |
+| C-c g f  | `ggtags-find-file'         |
+| C-c g h  | `ggtags-view-tag-history'  |
+| C-c g r  | `ggtags-find-reference'    |
+| C-c g s  | `ggtags-find-other-symbol' |
+| C-c g u  | `ggtags-update-tags'       |
+|----------+----------------------------|
+| M-,      | `pop-tag-mark'             |
+| M-.      | `ggtags-find-tag-dwim'     |
