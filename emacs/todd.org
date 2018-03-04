@@ -20,8 +20,13 @@ in many other Emacs user's configuration files.
   * Aaron Bieber's [[https://blog.aaronbieber.com/2016/11/24/org-capture-from-anywhere-on-your-mac.html][Org Capture from Anywhere on Your Mac]]
   * Filipe Silva's [[https://github.com/ninrod/dotfiles/blob/master/emacs/boot.org][Ninrod Emacs Configuration]]
   * [[http://emacs-bootstrap.com/][Emacs Bootstrap]]
+  * Amit Patel's blog posts: [[http://amitp.blogspot.com/search/label/emacs][Amits Thoughts: emacs]]
 
 * Base configuration
+
+This is written on and assumes Emacs 25, currently Emacs 25.3. Emacs 26 looks like
+it will have a few interesting improvements. See [[http://amitp.blogspot.com/2017/10/building-mac-os-x-emacs-26.html][Building MacOS Emacs 26]] for information
+on building Emacs 26 for the Mac.
 
 ** First a bit of information about the file and me
 
@@ -119,7 +124,8 @@ Use UTF-8 /everywhere/.
 *** Simple Customizations
 
 #+BEGIN_SRC emacs-lisp
-  (setq confirm-kill-emacs                  'y-or-n-p
+  (setq
+        ; confirm-kill-emacs                  'y-or-n-p
         confirm-nonexistent-file-or-buffer  t
         save-interprogram-paste-before-kill t
         mouse-yank-at-point                 t
@@ -324,15 +330,83 @@ Now for some themes.
   (load-theme 'spacemacs-light t)
 #+END_SRC
 
-** Time in the modeline
+** Pretty modeline
+
+See [[http://amitp.blogspot.com/2017/01/emacs-spaceline-mode-line.html][Amit Patels post about Emacs spaceline mode line]]; wow, lots of customization potential in spaceline.
+However, I can probably make due with something simpler.
 
 #+begin_src emacs-lisp
-(display-time-mode 1)
+  (use-package winum
+    :init
+    (setq winum-auto-setup-mode-line nil)
+    :config
+    (winum-mode))
+
+  (use-package anzu
+    :delight
+    :config
+    (global-anzu-mode))
+
+  (use-package fancy-battery)
+
+  (use-package spaceline
+    :demand t
+    :init
+    (setq-default ; powerline-height 20
+                  powerline-default-separator 'arrow-fade
+                  spaceline-flycheck-bullet "❖%s"
+                  spaceline-separator-dir-left '(right . right)
+                  spaceline-separator-dir-right '(left . left)
+                  spaceline-workspace-numbers-unicode t
+                  spaceline-windows-numbers-unicode t)
+    :config
+    (require 'spaceline-config)
+    (spaceline-spacemacs-theme))
 #+end_src
+
+** Screen saver
+
+#+BEGIN_SRC emacs-lisp
+  (use-package zone-nyan)
+  (use-package zone
+    :init
+    (setq zone-programs [zone-nyan])
+    :config
+    (zone-when-idle 60))
+#+END_SRC
+
+** Syntax highlighting and other highlighting
+
+There are many possibilites here. Worthwhile discussions on this can be found at:
+
+  * [[http://www.wilfred.me.uk/blog/2014/09/27/the-definitive-guide-to-syntax-highlighting/][The Definitive Guide To Syntax Highlighting]] on Wifred Hughes blog.
+  * [[http://amitp.blogspot.com/2014/09/emacs-rainbow-identifiers-customized.html][Rainbow-identifiers vs color-identifiers-mode]] on Amit Patel's blog.
+  * [[https://medium.com/@evnbr/coding-in-color-3a6db2743a1e][Coding in color]] by Evan Brooks
+
+*** Highlight context line
+
+Highlight the top/bottom line of view while paging. Not sure about this.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package highlight-context-line
+    :config
+    (highlight-context-line-mode 1))
+#+END_SRC
+
+*** Highligt indention level
+
+#+BEGIN_SRC emacs-lisp
+  (use-package highlight-indent-guides
+    :init
+    (setq highlight-indent-guides-method 'character)
+    :hook prog-mode)
+#+END_SRC
 
 * Extensions
 
 ** Avy
+
+See dumb-jump, ace-jump, and ggtags
 
 #+BEGIN_SRC emacs-lisp
   (use-package avy
@@ -492,6 +566,7 @@ commands
     ("<f8> b b" . counsel-ibuffer)
     ; searching
     ("C-s" . swiper)
+    ("C-c s" . isearch-forward-regexp)
     ("<f8> / g" . counsel-git-grep)
     ("<f8> / a" . counsel-ag))
 #+END_SRC
@@ -564,7 +639,7 @@ Be sure to see [[http://www.flycheck.org/en/latest/index.html][Flycheck document
 
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
-    :delight " Fc"
+    :delight "f"
     :init (global-flycheck-mode))
 #+END_SRC
 
@@ -660,7 +735,6 @@ See [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's Emacs configu
 
 #+BEGIN_SRC emacs-lisp
   (use-package org
-    :delight "O"
     :mode "\\.org\'"
     :init
     (setq org-default-notes-file "~/notes.org"))
@@ -686,13 +760,20 @@ Install the package, but I really prefer the asterisks now.
     (global-page-break-lines-mode))
 #+END_SRC
 
+** Pomodoro method
+
+#+BEGIN_SRC emacs-lisp
+  (use-package pomidor
+    :commands pomidor)
+#+END_SRC
+
 ** Projectile
 
 See the documentation at [[https://projectile.readthedocs.io/en/latest/][Projectile at readthedocs]].
 
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :delight '(:eval (concat " {" (projectile-project-name) "}"))
+    :delight '(:eval (concat "[" (projectile-project-name) "]"))
     :init
     (setq projectile-completion-system 'ivy)
     ; (setq projectile-keymap-prefix (kbd "<f8> p"))
@@ -738,6 +819,7 @@ See the documentation at [[https://projectile.readthedocs.io/en/latest/][Project
 
 #+BEGIN_SRC emacs-lisp
   (use-package undo-tree
+    :delight
     :config
     (global-undo-tree-mode 1))
 #+END_SRC
@@ -795,15 +877,196 @@ When you're done, press =C-c <left>=.
 
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
+    :delight
     :config
     (yas-global-mode 1))
 #+END_SRC
 
 * Programming languages
 
-#+BEGIN_SRC emacs-lisp
+** C
 
+*** Background, links, how-tos
+
+  - [[https://tuhdo.github.io/c-ide.html][C/C++ Development Environment for Emacs]]
+
+*** Indenting and style guides for C
+
+  - From EmacsWiki: [[https://www.emacswiki.org/emacs/IndentingC][Indenting C]]
+  - [[https://01.org/linuxgraphics/gfx-docs/drm/process/coding-style.html][Linux kernel style]]
+  - [[https://www.freebsd.org/cgi/man.cgi?query%3Dstyle&sektion%3D9][FreeBSD kernel style]]
+  - [[http://man.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man9/style.9?query%3Dstyle%2526arch%3Di386][OpenBSD kernel style]]
+
+  After the fact, =indent= can be used to correct a file's indenting.
+  =indent -kr -i8= will indent according to K&R with indents 8 chars wide.
+  The styles =-kr= and =-linux= have the following settings.
+
+           | option | k&r | linux | notes                                       |
+           |--------+-----+-------+---------------------------------------------|
+           | -bap   | yes | yes   | blank line after procedure                  |
+           | -nbad  | yes | yes   | no force blank line after decl              |
+           | -nbc   | yes | yes   | no force newline after comma in decl        |
+           | -hnl   | yes | yes   | honour new lines in source                  |
+           |--------+-----+-------+---------------------------------------------|
+           | -ci4   | yes | yes   | continuation indent of 4 spaces             |
+           | -lp    | yes | yes   | line up continuation lines at parens        |
+           | -cli0  | yes | yes   | case label indent of 0 spaces               |
+           | -bbo   | yes | yes   | break long line before boolean operator     |
+           | -ip0   | yes | yes   | indent 0 for old style parameters           |
+           |--------+-----+-------+---------------------------------------------|
+           | -br    | yes | yes   | braces on line with if, etc.                |
+           | -brs   | yes | yes   | braces on struct declaration line           |
+           |--------+-----+-------+---------------------------------------------|
+           | -c33   | yes | yes   | comment column to right of code             |
+           | -cd33  | yes | yes   | comment column to right of declaration      |
+           | -cp33  | yes | yes   | comment column right of #else, #endif       |
+           | -ncdb  | yes | yes   | no 1-line comment delimiters on blank lines |
+           | -nfca  | yes | yes   | no formatting of comments                   |
+           | -nfc1  | yes | yes   | no formatting of col 1 comments             |
+           | -nsc   | yes | yes   | no force * at left of comments              |
+           | -d0    | yes | yes   | indentation for line comments is 0          |
+           |--------+-----+-------+---------------------------------------------|
+           | -ce    | yes | yes   | cuddle brace and else on same line          |
+           | -di1   | yes | yes   | declaration variables close to type         |
+           | -npcs  | yes | yes   | no space after function call names          |
+           | -nprs  | yes | yes   | no force space after/before parens          |
+           | -npsl  | yes | yes   | no force separate line for procedure type   |
+           | -saf   | yes | yes   | space between for and paren                 |
+           | -sai   | yes | yes   | space between if and paren                  |
+           | -saw   | yes | yes   | space between while and paren               |
+           |--------+-----+-------+---------------------------------------------|
+           | -i4    | yes |       | indentation 4 spaces                        |
+           | -i8    |     | yes   | indentation 8 spaces                        |
+           | -l75   | yes |       | line length 75                              |
+           | -l80   |     | yes   | line lenght 80                              |
+           |--------+-----+-------+---------------------------------------------|
+           | -nsob  | yes |       | no swallow blank lines                      |
+           | -nss   | yes |       | no forced space before special ;            |
+           | -ss    |     | yes   | space before ; in one line for and while    |
+           | -cs    | yes |       | space after a cast operator                 |
+           | -ts8   |     | yes   | tab size 8                                  |
+           | -il1   |     | yes   | set offset for labels to column 1           |
+
+*** cc-mode
+  Background
+
+  - From EmacsWiki: [[https://www.emacswiki.org/emacs/CcMode][cc-mode]]
+  - [[https://www.gnu.org/software/emacs/manual/html_node/ccmode/][CC Mode Manual]]
+
+  Use cc-mode for formating C and C++.
+  Add a new style, =linux-tabs-only=, found in the Linux kernel style guide mentioned
+  above. My =c-mode-hook= is found here and controls default (and otherwise) style.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package cc-mode
+      :config
+      (defun c-lineup-arglist-tabs-only (ignored)
+        "Line up argument lists by tabs, not spaces"
+        (let* ((anchor (c-langelem-pos c-syntactic-element))
+               (column (c-langelem-2nd-pos c-syntactic-element))
+               (offset (- (1+ column) anchor))
+               (steps (floor offset c-basic-offset)))
+          (* (max steps 1)
+             c-basic-offset)))
+
+      (add-hook 'c-mode-common-hook
+                (lambda ()
+                  ;; Add kernel style
+                  (c-add-style
+                   "linux-tabs-only"
+                   '("linux" (c-offsets-alist
+                              (arglist-cont-nonempty
+                               c-lineup-gcc-asm-reg
+                               c-lineup-arglist-tabs-only))))))
+
+      (add-hook 'c-mode-hook
+                (lambda ()
+                  (let ((filename (buffer-file-name)))
+
+                    ;; My defaults for c-code
+                    (setq c-default-style "linux")
+                    (setq show-trailing-whitespace t)
+                    (setq indent-tabs-mode t)
+
+                    ;; Override these defaults based on file/project location
+                    ;; Example for linux kernel coding:
+                    (when (and filename
+                               (string-match (expand-file-name "~/src/linux-trees")
+                                             filename))
+                      (c-set-style "linux-tabs-only"))))))
 #+END_SRC
+
+*** GDB
+
+#+BEGIN_SRC emacs-lisp
+  (setq gdb-many-windows t
+        gdb-show-main t)
+#+END_SRC
+
+*** semantic
+
+#+BEGIN_SRC emacs-lisp
+  (use-package semantic
+    :init
+    (setq semantic-default-submodes
+          '(;; Perform semantic actions during idle time
+            global-semanticdb-minor-mode
+            ;; Decorate buffers with additional semantic information
+            global-semantic-decoration-mode
+            ;; Highlight the name of the function you're currently in
+            global-semantic-highlight-func-mode
+            ;; show the name of the function at the top in a sticky
+            global-semantic-stickyfunc-mode
+            ;; Generate a summary of the current tag when idle
+            global-semantic-idle-summary-mode
+            ;; Show a breadcrumb of location during idle time
+            global-semantic-idle-breadcrumbs-mode
+            ;; Switch to recently changed tags with `semantic-mrub-switch-tags',
+            ;; or `C-x B'
+            global-semantic-mru-bookmark-mode))
+    )
+#+END_SRC
+
+*** ede
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ede
+    :config
+    (global-ede-mode))
+#+END_SRC
+
+*** ggtags
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ggtags
+    :config
+    (ggtags-mode 1)
+    (add-hook 'c-mode-common-hook
+              (lambda ()
+                (when (derived-mode-p 'c-mode 'c++mode 'java-mode 'asm-mode)
+                  (ggtags-mode 1))))
+    :bind
+    (:map ggtags-mode-map
+     ("C-c g s" . ggtags-find-other-symbol)
+     ("C-c g h" . ggtags-view-tag-history)
+     ("C-c g r" . ggtags-find-reference)
+     ("C-c g f" . ggtags-find-file)
+     ("C-c g c" . ggtags-create-tags)
+     ("C-c g u" . ggtags-update-tags)
+     ("M-."     . ggtags-find-tag-dwim)
+     ("M-,"     . pop-tag-mark)
+     ("C-c <"   . ggtags-prev-mark)
+     ("C-c >"   . ggtags-next-mark)))
+#+END_SRC
+
+*** company-c-headers
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company-c-headers
+    :init
+    (add-to-list 'company-backends 'company-c-headers))
+#+END_SRC
+
 
 * Keybindings
 
